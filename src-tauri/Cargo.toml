@@ -1,0 +1,79 @@
+[package]
+name = "nakos"
+version = "0.5.0"
+description = "Nakos — the Bitcoin Financial Operating System"
+authors = ["The Nakos developers"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "nakos_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-dialog = "2"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+anyhow = "1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled", "chrono", "uuid"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.25"
+rusqlite_migration = "1"
+
+# Bitcoin
+bitcoin = { version = "0.32", features = ["serde", "base64"] }
+bdk_wallet = { version = "2.3" }
+bdk_electrum = "0.24"
+bitcoincore-rpc = "0.19"
+electrum-client = "0.25.2"
+
+# Crypto
+aes-gcm = { version = "0.10", features = ["zeroize"] }
+# Named only to switch on its `zeroize` feature: the AES key schedule built for every encrypt and
+# decrypt is then wiped when it is dropped. The version is the one already in the lockfile.
+aes = { version = "0.8", features = ["zeroize"] }
+argon2 = { version = "0.5", features = ["zeroize"] }
+rand = "0.8"
+zeroize = { version = "1", features = ["derive"] }
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
+
+# TLS provider. rustls 0.23 will not choose a crypto provider on its own when more than one is
+# compiled in (here `ring` via reqwest and `aws-lc-rs` via electrum-client), and panics at the
+# first TLS client. `rpc::ensure_tls_provider` installs `ring` once; this dependency only exists
+# to name it. Feature unification is additive, so this removes nothing the other crates enable.
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+
+# Networking (fee estimation fallback only — never balances)
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking"] }
+
+tokio = { version = "1", features = ["full"] }
+parking_lot = "0.12"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# Phones only: reads and writes the `content://` file a dialog returns on Android (see
+# commands/file_dialog.rs). Already in the lockfile through tauri-plugin-dialog. The webview gets no
+# fs permission (capabilities/default.json; a test checks).
+[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+tauri-plugin-fs = "2"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

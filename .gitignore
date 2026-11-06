@@ -1,0 +1,33 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# Tauri
+src-tauri/target
+# gen/android is the Android project and is tracked; the rest of gen/ is generated.
+src-tauri/gen/*
+!src-tauri/gen/android
+
+# Local data (never commit user wallet data)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+nakos-data/
+
+.DS_Store
+.env
+# Signing keys never belong in the repository.
+*.jks
+*.keystore
+*.log
+
+# Local-only patterns for scripts/secret-scan.sh (they name private infrastructure).
+.secret-scan.local
+# Signing material for scripts/sign-*.{sh,ps1}
+*.p8
+*.cer
+*.p12
+*.pfx

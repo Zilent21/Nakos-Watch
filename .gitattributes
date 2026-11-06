@@ -1,0 +1,3 @@
+# Text files are checked out with LF on every platform. Several Rust tests read the sources with
+# include_str! and match "\n}\n", so a CRLF checkout (Git for Windows' default) would fail them.
+* text=auto eol=lf

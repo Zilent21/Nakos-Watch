@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "trayIcon": null
+  },
+  "bundle": {
+    "publisher": "Nakos",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "languages": ["English"],
+        "customLanguageFiles": { "English": "windows/English.nsh" }
+      }
+    }
+  }
+}

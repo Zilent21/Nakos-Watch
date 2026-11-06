@@ -1,0 +1,228 @@
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-bitcoin: hsl(var(--bitcoin));
+  --color-bitcoin-foreground: hsl(var(--bitcoin-foreground));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --text-13: 0.8125rem;
+  --text-13--line-height: 1.25rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.5rem;
+
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
+  --font-mono: JetBrains Mono, SF Mono, Menlo, monospace;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility focus-ring {
+  @apply outline-hidden ring-2 ring-offset-2 ring-offset-background ring-[hsl(var(--ring))];
+}
+
+@layer utilities {
+  :root {
+    color-scheme: dark;
+  }
+
+  .dark {
+    --background: 220 20% 6%;
+    --foreground: 220 15% 92%;
+
+    --card: 220 18% 9%;
+    --card-foreground: 220 15% 92%;
+
+    --popover: 220 18% 8%;
+    --popover-foreground: 220 15% 92%;
+
+    --primary: 220 15% 92%;
+    --primary-foreground: 220 20% 8%;
+
+    --secondary: 220 16% 14%;
+    --secondary-foreground: 220 15% 88%;
+
+    --muted: 220 16% 13%;
+    --muted-foreground: 220 10% 58%;
+
+    --accent: 220 16% 16%;
+    --accent-foreground: 220 15% 92%;
+
+    --destructive: 5 70% 52%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 152 55% 42%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 24 30% 10%;
+
+    --border: 220 15% 16%;
+    --input: 220 15% 16%;
+    --ring: 27 96% 53%;
+
+    --bitcoin: 27 96% 53%;
+    --bitcoin-foreground: 24 30% 8%;
+
+    --radius: 0.75rem; /* 12px; md 10px, sm 8px: radius stays within 8-12px */
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  ::selection {
+    background-color: hsl(var(--foreground) / 0.2);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+    background-clip: content-box;
+  }
+  /* Touch-only screens (phones) scroll by touch; the desktop scrollbar above would take 10px of width. */
+  @media (hover: none) and (pointer: coarse) {
+    ::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  }
+
+  .mono-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
+
+/* Score ring: a short rotate-and-sweep when it first appears. */
+@keyframes ring-spin-in {
+  from {
+    transform: rotate(-200deg);
+  }
+  to {
+    transform: rotate(-90deg);
+  }
+}
+.ring-spin-in {
+  animation: ring-spin-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ring-spin-in {
+    animation: none;
+    transform: rotate(-90deg);
+  }
+}
