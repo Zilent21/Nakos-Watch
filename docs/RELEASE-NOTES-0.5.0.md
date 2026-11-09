@@ -11,9 +11,6 @@ check that it does what this page says.
 If Nakos is useful to you, you can support development with a one-time payment over Lightning or
 on-chain (21,000 sats suggested) at nakos.org/#support. It's optional and unlocks nothing.
 
-**Bought a license for 0.4.0?** Thank you: you were one of the first supporters. Your key keeps
-working as a supporter receipt and nothing changes for you. 0.5.0 simply no longer asks for it.
-
 ## New
 
 - **Linux.** A portable AppImage, plus .deb and .rpm packages. New and not yet tried on a Linux desktop:
