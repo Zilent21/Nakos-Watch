@@ -19,6 +19,7 @@ import { useShellStore } from "@/stores/shell-store";
 import { toast } from "@/hooks/use-toast";
 import { handlePublicServerGate } from "@/components/public-server-gate";
 import { useNavigate } from "react-router-dom";
+import { WalletDetailsDialog } from "./wallet-details";
 
 // Muted, quiet palette: no orange here (orange is reserved for CTAs, focus and score rings).
 const CUSTODY_COLORS: Record<string, string> = {
@@ -41,6 +42,7 @@ export function PortfolioPage() {
   const navigate = useNavigate();
   const setAddWalletOpen = useShellStore((s) => s.setAddWalletOpen);
   const [showArchived, setShowArchived] = useState(false);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
   const { fiatCurrency, fiatPricePerBtc } = usePreferencesStore();
 
   const { data: summary, error: summaryError } = useQuery({ queryKey: ["portfolio-summary"], queryFn: api.portfolioSummary });
@@ -217,7 +219,9 @@ export function PortfolioPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2">
                         <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: CUSTODY_COLORS[w.custody_type] ?? "#6B7280" }} />
-                        <span className="truncate text-sm font-medium">{w.name}</span>
+                        <button type="button" className="truncate text-left text-sm font-medium underline-offset-4 hover:underline" onClick={() => setDetailsId(w.id)}>
+                          {w.name}
+                        </button>
                         {w.archived && (
                           <Badge variant="muted" className="text-xs">
                             archived
@@ -266,7 +270,9 @@ export function PortfolioPage() {
                       <TD>
                         <div className="flex items-center gap-3">
                           <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: CUSTODY_COLORS[w.custody_type] ?? "#6B7280" }} />
-                          {w.name}
+                          <button type="button" className="text-left underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-hidden" onClick={() => setDetailsId(w.id)} title="Show wallet details">
+                            {w.name}
+                          </button>
                           {w.archived && (
                             <Badge variant="muted" className="text-xs">
                               archived
@@ -309,6 +315,11 @@ export function PortfolioPage() {
           )}
         </CardContent>
       </Card>
+      <WalletDetailsDialog
+        wallet={wallets?.find((w) => w.id === detailsId) ?? null}
+        balance={detailsId ? balanceById.get(detailsId)?.balance_sats : undefined}
+        onOpenChange={(open) => !open && setDetailsId(null)}
+      />
     </>
   );
 }

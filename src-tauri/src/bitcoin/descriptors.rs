@@ -126,6 +126,32 @@ pub fn change_from_receive(descriptor: &str) -> Option<String> {
     Some(body.replace("/0/*", "/1/*"))
 }
 
+/// Sparrow, Bitcoin Core and others export one descriptor for both branches:
+/// `.../<0;1>/*`. BDK takes one branch per descriptor, so this splits it into
+/// the receive (`/0/*`) and change (`/1/*`) descriptors, each with its own
+/// checksum. `Ok(None)` when the descriptor isn't multipath.
+pub fn split_multipath(descriptor: &str) -> Result<Option<(String, String)>, DescriptorError> {
+    use bdk_wallet::miniscript::{Descriptor, DescriptorPublicKey};
+    use std::str::FromStr;
+    let parsed = Descriptor::<DescriptorPublicKey>::from_str(descriptor.trim())
+        .map_err(|e| DescriptorError::InvalidDescriptor(e.to_string()))?;
+    if !parsed.is_multipath() {
+        return Ok(None);
+    }
+    let mut singles = parsed
+        .into_single_descriptors()
+        .map_err(|e| DescriptorError::InvalidDescriptor(e.to_string()))?;
+    if singles.len() != 2 {
+        return Err(DescriptorError::InvalidDescriptor(format!(
+            "this descriptor has {} branches; Nakos takes a receive/change pair such as <0;1>",
+            singles.len()
+        )));
+    }
+    let change = singles.pop().expect("two").to_string();
+    let receive = singles.pop().expect("two").to_string();
+    Ok(Some((receive, change)))
+}
+
 fn purpose_kind(path: &str) -> Option<ScriptKind> {
     let first = path.trim().trim_start_matches("m/").split('/').next()?;
     match first.trim_end_matches(['\'', 'h', 'H']) {
@@ -365,6 +391,21 @@ mod tests {
         assert_eq!(change.matches('[').count(), 1, "origin must not be wrapped a second time");
         assert_eq!(address_at(&change, 0), BIP84_CHANGE_0);
         assert!(change_from_receive("wpkh([aa/84h/0h/0h]xpub/<0;1>/*)").is_none());
+    }
+
+    #[test]
+    fn a_sparrow_multipath_descriptor_splits_into_receive_and_change() {
+        let d = "wpkh([73c5da0a/84h/0h/0h]xpub6CatWdiZiodmUeTDp8LT5or8nmbKNcuyvz7WyksVFkKB4RHwCD3XyuvPEbvqAQY3rAPshWcMLoP2fMFMKHPJ4ZeZXYVUhLv1VMrjPC7PW6V/<0;1>/*)";
+        let (recv, change) = split_multipath(d).unwrap().unwrap();
+        assert!(recv.starts_with("wpkh([73c5da0a/84'/0'/0']xpub6Cat") || recv.starts_with("wpkh([73c5da0a/84h/0h/0h]xpub6Cat"), "{recv}");
+        assert!(recv.contains("/0/*)#") && change.contains("/1/*)#"), "{recv} {change}");
+        for one in [&recv, &change] {
+            bdk_wallet::Wallet::create_single(one.clone())
+                .network(Network::Bitcoin)
+                .create_wallet_no_persist()
+                .unwrap();
+        }
+        assert!(split_multipath("wpkh([73c5da0a/84h/0h/0h]xpub6CatWdiZiodmUeTDp8LT5or8nmbKNcuyvz7WyksVFkKB4RHwCD3XyuvPEbvqAQY3rAPshWcMLoP2fMFMKHPJ4ZeZXYVUhLv1VMrjPC7PW6V/0/*)").unwrap().is_none());
     }
 
     /// Pasted text can be anything: a character that straddles byte 4 must not panic (it used

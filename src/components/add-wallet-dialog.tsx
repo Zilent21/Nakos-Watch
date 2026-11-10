@@ -156,7 +156,7 @@ export function AddWalletDialog({ open, onOpenChange }: { open: boolean; onOpenC
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Coldcard Vault" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Trezor Vault" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

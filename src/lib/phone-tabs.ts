@@ -5,7 +5,7 @@
 export const PHONE_TABS_PREF = "phone_tabs";
 
 /** Screens a phone may show, in menu order. Map is left out on phones (mobile v1). */
-export const PHONE_SCREENS = ["/", "/portfolio", "/health", "/security", "/privacy", "/inheritance", "/utxos", "/spend", "/node", "/settings"];
+export const PHONE_SCREENS = ["/", "/portfolio", "/health", "/security", "/privacy", "/inheritance", "/receive", "/utxos", "/spend", "/node", "/settings"];
 
 export const TAB_COUNT = 4;
 

@@ -10,6 +10,7 @@ import { useVaultStore } from "@/stores/vault-store";
 import { useOs } from "@/lib/platform";
 import { paletteShortcut } from "@/lib/os-text";
 import { useShellStore } from "@/stores/shell-store";
+import { useAutoCheck } from "@/hooks/use-auto-check";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const lock = useVaultStore((s) => s.lock);
@@ -17,6 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const setPaletteOpen = useShellStore((s) => s.setPaletteOpen);
   const addWalletOpen = useShellStore((s) => s.addWalletOpen);
   const setAddWalletOpen = useShellStore((s) => s.setAddWalletOpen);
+  useAutoCheck();
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background pt-[env(safe-area-inset-top)]">

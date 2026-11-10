@@ -143,8 +143,14 @@ pub(crate) fn insert_wallet(conn: &rusqlite::Connection, input: NewWallet) -> Re
             // Stored exactly as pasted — it already carries its own
             // [fingerprint/path], so it is never wrapped again.
             let d = input.descriptor.clone().ok_or("descriptor value required")?;
-            let change = input.change_descriptor.clone().or_else(|| descriptors::change_from_receive(&d));
-            (Some(d), change)
+            // A `<0;1>` descriptor (Sparrow's export) holds both branches: store them apart.
+            match descriptors::split_multipath(&d).map_err(|e| e.to_string())? {
+                Some((receive, change)) => (Some(receive), Some(change)),
+                None => {
+                    let change = input.change_descriptor.clone().or_else(|| descriptors::change_from_receive(&d));
+                    (Some(d), change)
+                }
+            }
         }
         "address" => {
             let addr = input.descriptor.clone().ok_or("address value required")?;
@@ -331,7 +337,7 @@ pub fn get_multisig_config(state: tauri::State<AppState>, wallet_id: String) -> 
     Ok(Some(config))
 }
 
-fn get_wallet(conn: &rusqlite::Connection, id: &str) -> Result<Wallet, String> {
+pub(crate) fn get_wallet(conn: &rusqlite::Connection, id: &str) -> Result<Wallet, String> {
     conn.query_row("SELECT * FROM wallets WHERE id = ?1", params![id], row_to_wallet)
         .map_err(|e| e.to_string())
 }
@@ -430,6 +436,10 @@ fn sync_wallet_on(pool: &crate::db::DbPool, id: String) -> Result<SyncResult, St
         params![id],
     )
     .map_err(|e| e.to_string())?;
+    // A failed alert check never fails the sync that just succeeded.
+    if let Err(e) = crate::commands::alerts::evaluate(&conn) {
+        tracing::warn!("alert check after sync failed: {e}");
+    }
 
     Ok(SyncResult {
         wallet_id: id,
@@ -888,6 +898,36 @@ mod private_key_tests {
         }
     }
 
+    // Sparrow-style <0;1> descriptor; BIP84 test vector account 0 ("abandon … about"), public test data.
+    const SPARROW: &str = "wpkh([73c5da0a/84h/0h/0h]xpub6CatWdiZiodmUeTDp8LT5or8nmbKNcuyvz7WyksVFkKB4RHwCD3XyuvPEbvqAQY3rAPshWcMLoP2fMFMKHPJ4ZeZXYVUhLv1VMrjPC7PW6V/<0;1>/*)";
+
+    #[test]
+    fn a_multipath_descriptor_is_stored_as_receive_and_change() {
+        let conn = mem_db();
+        let mut w = new_wallet("descriptor");
+        w.descriptor = Some(SPARROW.into());
+        let saved = insert_wallet(&conn, w).unwrap();
+        let (recv, change) = (saved.descriptor.unwrap(), saved.change_descriptor.unwrap());
+        assert!(!recv.contains('<') && recv.contains("/0/*)") && change.contains("/1/*)"), "{recv} {change}");
+    }
+
+    #[test]
+    fn a_multipath_descriptor_saved_before_the_fix_is_split_when_the_vault_opens() {
+        let conn = mem_db();
+        conn.execute(
+            "INSERT INTO wallets (id, name, custody_type, risk_level, source_type, descriptor, network)
+             VALUES ('old','Old','cold_storage','low','descriptor',?1,'bitcoin')",
+            [SPARROW],
+        )
+        .unwrap();
+        crate::db::split_saved_multipath_descriptors(&conn).unwrap();
+        crate::db::split_saved_multipath_descriptors(&conn).unwrap(); // a second open changes nothing
+        let (recv, change): (String, String) = conn
+            .query_row("SELECT descriptor, change_descriptor FROM wallets WHERE id = 'old'", [], |r| Ok((r.get(0)?, r.get(1)?)))
+            .unwrap();
+        assert!(recv.contains("/0/*)") && change.contains("/1/*)"), "{recv} {change}");
+    }
+
     #[test]
     fn a_seed_phrase_or_wif_key_is_refused_in_every_field_and_public_material_is_not_mistaken_for_one() {
         let seed12 = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
@@ -1046,7 +1086,7 @@ mod private_key_tests {
         }
 
         // Ordinary text still saves.
-        let ok = [cosigner(XPUB, "Key 1", Some("Coldcard")), cosigner(XPUB_2, "Key 2", None)];
+        let ok = [cosigner(XPUB, "Key 1", Some("Trezor")), cosigner(XPUB_2, "Key 2", None)];
         insert_multisig_wallet(&conn, "Vault".into(), "multisig_vault".into(), "low".into(), "bitcoin".into(), 2, &ok, "p2wsh").unwrap();
         assert_eq!(count(&conn, "multisig_cosigners"), 2);
     }

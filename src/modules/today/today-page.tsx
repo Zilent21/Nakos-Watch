@@ -8,12 +8,11 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { ScoreRing } from "@/components/ui/score-ring";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GettingStartedCard } from "@/modules/onboarding/import-guide";
+import { AlertsCard } from "@/modules/receive/alerts-panel";
 import * as api from "@/bindings/commands";
 import { formatFiat, satsToFiat, formatRelativeTime } from "@/lib/format";
 import { useFormatAmount } from "@/lib/use-amount";
 import { usePreferencesStore } from "@/stores/preferences-store";
-import { useShellStore } from "@/stores/shell-store";
 import type { NodeConfig, Priority } from "@/bindings/types";
 
 type Action = { id: string; title: string; detail: string; priority: Priority; to: string };
@@ -51,7 +50,6 @@ function StatusRow({ label, state, detail }: { label: string; state: "ok" | "dow
 export function TodayPage() {
   const amount = useFormatAmount();
   const { fiatCurrency, fiatPricePerBtc } = usePreferencesStore();
-  const setAddWalletOpen = useShellStore((s) => s.setAddWalletOpen);
 
   // Everything below except node status is local sqlite, so it renders even
   // when Core or the Electrum server is down.
@@ -90,6 +88,7 @@ export function TodayPage() {
 
   const actions = useMemo<Action[]>(() => {
     const list: Action[] = [];
+    if (wallets && walletCount === 0) list.push({ id: "no-wallet", title: "Add your first wallet", detail: "Portfolio shows how to export a descriptor or xpub and paste it in.", priority: "high", to: "/portfolio" });
     if (status) {
       if (coreState === "down") list.push({ id: "core-down", title: "Bitcoin Core isn't responding", detail: `Couldn't reach ${coreHost}. Health and fee data are last-known.`, priority: "high", to: "/node" });
       if (electrumState === "down") list.push({ id: "electrum-down", title: "Your Electrum server isn't responding", detail: `Couldn't reach ${electrumHost}. Balances are last-known until it is back.`, priority: "high", to: "/node" });
@@ -120,18 +119,14 @@ export function TodayPage() {
 
   const health = history?.[0];
 
-  if (wallets && walletCount === 0) {
-    return (
-      <>
-        <PageHeader title="Today" description="Your Bitcoin, in one place." />
-        <GettingStartedCard onAddWallet={() => setAddWalletOpen(true)} />
-      </>
-    );
-  }
-
   return (
     <>
-      <PageHeader title="Today" description={`Net holdings across ${walletCount} watch-only wallet${walletCount === 1 ? "" : "s"}.`} />
+      <PageHeader
+        title="Today"
+        description={walletCount === 0 ? "Your Bitcoin, in one place. No wallets yet." : `Net holdings across ${walletCount} watch-only wallet${walletCount === 1 ? "" : "s"}.`}
+      />
+
+      <AlertsCard />
 
       {nodeDown && (
         <div role="status" className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">

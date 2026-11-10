@@ -12,6 +12,7 @@ pub fn migrations() -> Migrations<'static> {
         M::up(include_str!("../../migrations/0006_utxo_basis_note.sql")),
         M::up(include_str!("../../migrations/0007_core_rpc_no_tls.sql")),
         M::up(include_str!("../../migrations/0008_utxo_unseen_since.sql")),
+        M::up(include_str!("../../migrations/0009_receive_and_alerts.sql")),
     ])
 }
 
@@ -57,5 +58,30 @@ mod tests {
             )
             .unwrap();
         assert_eq!(row, (5000, 1, Some("cold".into()), Some(12.5), Some("2024-01-02".into()), Some("gift".into()), None));
+    }
+
+    /// 0009 only adds the receiving and alert tables: existing wallets and coins are untouched,
+    /// and deleting a wallet takes its handed-out addresses and alerts with it.
+    #[test]
+    fn migration_0009_adds_receiving_tables_and_keeps_wallets() {
+        let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+        migrations().to_version(&mut conn, 8).unwrap();
+        conn.execute("INSERT INTO wallets (id,name,custody_type,source_type) VALUES ('w','t','cold_storage','xpub')", []).unwrap();
+        conn.execute("INSERT INTO utxos (id,wallet_id,txid,vout,amount_sats) VALUES ('u','w','tx',0,5000)", []).unwrap();
+        assert!(conn.prepare("SELECT 1 FROM receive_addresses").is_err());
+        migrations().to_latest(&mut conn).unwrap();
+        conn.execute_batch("PRAGMA foreign_keys = ON;").unwrap();
+        let sats: i64 = conn.query_row("SELECT amount_sats FROM utxos WHERE id = 'u'", [], |r| r.get(0)).unwrap();
+        assert_eq!(sats, 5000);
+        conn.execute("INSERT INTO receive_addresses (id, wallet_id, address_index, address) VALUES ('r','w',0,'bc1q')", []).unwrap();
+        conn.execute("INSERT INTO balance_alerts (wallet_id, threshold_sats) VALUES ('w', 1000)", []).unwrap();
+        conn.execute("INSERT INTO alert_events (id, kind, wallet_id, ref_id, message) VALUES ('e','receive_paid','w','r','m')", []).unwrap();
+        assert!(conn.execute("INSERT INTO alert_events (id, kind, wallet_id, ref_id, message) VALUES ('e2','receive_paid','w','r','m')", []).is_err(), "one alert per payment");
+        assert!(conn.execute("INSERT INTO receive_addresses (id, wallet_id, address_index, address) VALUES ('r2','w',0,'bc1q2')", []).is_err(), "an index is handed out once");
+        conn.execute("DELETE FROM wallets WHERE id = 'w'", []).unwrap();
+        for t in ["receive_addresses", "balance_alerts", "alert_events"] {
+            let n: i64 = conn.query_row(&format!("SELECT COUNT(*) FROM {t}"), [], |r| r.get(0)).unwrap();
+            assert_eq!(n, 0, "{t}");
+        }
     }
 }

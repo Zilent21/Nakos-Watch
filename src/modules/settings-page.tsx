@@ -22,6 +22,7 @@ import { useDeviceWord, useIsMobile, useOs, useStaysUnlockedNote } from "@/lib/p
 import { keychainNote } from "@/lib/os-text";
 import { DEFAULT_PHONE_TABS, PHONE_SCREENS, chooseTab } from "@/lib/phone-tabs";
 import { screenFor } from "@/components/layout/nav-items";
+import { ReceivingSettingsCard } from "@/modules/receive/receiving-settings";
 
 const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF"];
 
@@ -447,7 +448,7 @@ function AboutCard() {
         <div className="space-y-2 border-t border-border pt-4">
           <p className="text-sm font-medium">Support development</p>
           <p className="text-sm text-muted-foreground">
-            If Nakos is useful to you, you can support its development with a one-time payment over Lightning or on-chain (21,000 sats suggested). It's optional and unlocks nothing,
+            If Nakos is useful to you, you can support its development with a one-time payment of any amount over Lightning or on-chain. It's optional and unlocks nothing,
             because nothing is locked. No account, no email.
           </p>
           <Button variant="outline" onClick={() => openLink("support")}>
@@ -536,6 +537,8 @@ export function SettingsPage() {
       <PageHeader title="Settings" description="Preferences, backups and the vault." />
 
       {mobile && <PhoneTabsCard />}
+
+      <ReceivingSettingsCard />
 
       <Card>
         <CardHeader>

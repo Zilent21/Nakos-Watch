@@ -6,7 +6,7 @@ import { DEFAULT_PHONE_TABS, PHONE_SCREENS, chooseTab, moreScreens, parsePhoneTa
 test("the default is Today, Portfolio, Coins and Node", () => {
   assert.deepEqual(DEFAULT_PHONE_TABS, ["/", "/portfolio", "/utxos", "/node"]);
   assert.ok(!PHONE_SCREENS.includes("/asset-map"), "Map is not offered on phones");
-  assert.equal(PHONE_SCREENS.length, 10);
+  assert.equal(PHONE_SCREENS.length, 11);
 });
 
 test("a saved choice of four different known screens is used as saved", () => {
@@ -49,6 +49,6 @@ test("choosing a screen already in another slot swaps the two", () => {
 });
 
 test("More lists every other screen in menu order", () => {
-  assert.deepEqual(moreScreens(DEFAULT_PHONE_TABS), ["/health", "/security", "/privacy", "/inheritance", "/spend", "/settings"]);
-  assert.deepEqual(moreScreens(["/settings", "/", "/spend", "/health"]), ["/portfolio", "/security", "/privacy", "/inheritance", "/utxos", "/node"]);
+  assert.deepEqual(moreScreens(DEFAULT_PHONE_TABS), ["/health", "/security", "/privacy", "/inheritance", "/receive", "/spend", "/settings"]);
+  assert.deepEqual(moreScreens(["/settings", "/", "/spend", "/health"]), ["/portfolio", "/security", "/privacy", "/inheritance", "/receive", "/utxos", "/node"]);
 });

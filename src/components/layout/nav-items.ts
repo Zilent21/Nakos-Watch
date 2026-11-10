@@ -10,6 +10,7 @@ import {
   Users,
   Settings,
   HeartPulse,
+  QrCode,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -41,6 +42,7 @@ export const NAV_GROUPS: { heading: string; items: NavItem[] }[] = [
   {
     heading: "Operate",
     items: [
+      { to: "/receive", label: "Receive", icon: QrCode },
       { to: "/utxos", label: "Coins", icon: Coins },
       { to: "/spend", label: "Spend", icon: SendHorizonal },
       { to: "/asset-map", label: "Map", icon: Network },

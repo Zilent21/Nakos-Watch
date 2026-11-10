@@ -1,6 +1,6 @@
 [package]
 name = "nakos"
-version = "0.5.0"
+version = "0.6.0"
 description = "Nakos — the Bitcoin Financial Operating System"
 authors = ["The Nakos developers"]
 license = "MIT"
@@ -37,6 +37,8 @@ bdk_wallet = { version = "2.3" }
 bdk_electrum = "0.24"
 bitcoincore-rpc = "0.19"
 electrum-client = "0.25.2"
+# QR codes for receive addresses, drawn by the webview from the modules (no image feature).
+qrcode = { version = "0.14", default-features = false }
 
 # Crypto
 aes-gcm = { version = "0.10", features = ["zeroize"] }

@@ -586,3 +586,96 @@ export interface AutoLockSettings {
   /** Android only: seconds in the background before the vault locks. */
   background_lock_seconds: number | null;
 }
+
+// -- receiving (0.6.0) -----------------------------------------------------
+
+/** An address handed out by Receive, derived from the wallet's own descriptor. */
+export interface ReceiveAddress {
+  id: string;
+  index: number;
+  address: string;
+  /** "m/84'/0'/0'/0/7", or "…/0/7" without an origin or for multisig. */
+  path: string;
+  label: string | null;
+  amount_sats: number | null;
+  device_checked_at: string | null;
+  created_at: string;
+  used: boolean;
+  received_sats: number;
+}
+
+export interface ReceiveOverview {
+  wallet_id: string;
+  wallet_name: string;
+  can_receive: boolean;
+  reason: string | null;
+  synced: boolean;
+  fingerprints: string[];
+  checksum: string | null;
+  gap_limit: number;
+  unused_given_out: number;
+  /** No /* range: one address, given out once. */
+  fixed: boolean;
+  addresses: ReceiveAddress[];
+}
+
+/** A QR code as rows of '1' (dark) and '0' (light), made in Rust. */
+export interface Qr {
+  size: number;
+  modules: string;
+}
+
+export interface SavedAddress {
+  id: string;
+  address: string;
+  label: string | null;
+  position: number;
+  given_out_at: string | null;
+  used_at: string | null;
+  received_sats: number | null;
+  device_checked_at: string | null;
+  created_at: string;
+  state: "fresh" | "given_out" | "used";
+}
+
+export interface AddressList {
+  id: string;
+  name: string;
+  network: string;
+  low_at: number;
+  last_checked_at: string | null;
+  fresh: number;
+  given_out: number;
+  used: number;
+  low: boolean;
+  addresses: SavedAddress[];
+}
+
+export interface AddAddressesResult {
+  added: number;
+  skipped: { text: string; reason: string }[];
+}
+
+export interface AddressCheckResult {
+  checked: number;
+  newly_used: number;
+  new_alerts: number;
+}
+
+export type AlertKind = "balance_over" | "receive_paid" | "saved_used" | "list_low";
+
+export interface AlertEvent {
+  id: string;
+  kind: AlertKind;
+  wallet_id: string | null;
+  list_id: string | null;
+  message: string;
+  created_at: string;
+  read_at: string | null;
+}
+
+export interface BalanceAlert {
+  wallet_id: string;
+  threshold_sats: number;
+  is_above: boolean;
+}

@@ -147,7 +147,7 @@ export function SecurityPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Hardware wallet model</Label>
-              <Input value={hwModel} onChange={(e) => setHwModel(e.target.value)} placeholder="e.g. Coldcard Mk4" />
+              <Input value={hwModel} onChange={(e) => setHwModel(e.target.value)} placeholder="e.g. Trezor Safe 5" />
             </div>
             <div className="space-y-1.5">
               <Label>Geographic backup locations</Label>

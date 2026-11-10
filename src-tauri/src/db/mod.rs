@@ -46,9 +46,31 @@ pub fn open_pool(app_data_dir: &Path) -> Result<DbPool, DbError> {
     {
         let mut conn = pool.get()?;
         migrations::migrations().to_latest(&mut conn)?;
+        split_saved_multipath_descriptors(&conn)?;
     }
 
     Ok(pool)
+}
+
+/// Before 0.6.0 a pasted `<0;1>` descriptor was saved as it was, and every
+/// sync of that wallet failed. Split any such wallet into its receive and
+/// change descriptors. Runs on every open; it does nothing once they're split.
+pub fn split_saved_multipath_descriptors(conn: &Connection) -> Result<(), DbError> {
+    let rows: Vec<(String, String)> = {
+        let mut stmt = conn.prepare("SELECT id, descriptor FROM wallets WHERE descriptor LIKE '%<%;%>%'")?;
+        let it = stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?;
+        it.collect::<Result<_, _>>()?
+    };
+    for (id, d) in rows {
+        // A descriptor that won't parse is left alone: its sync error still says what's wrong.
+        if let Ok(Some((receive, change))) = crate::bitcoin::descriptors::split_multipath(&d) {
+            conn.execute(
+                "UPDATE wallets SET descriptor = ?1, change_descriptor = ?2 WHERE id = ?3",
+                rusqlite::params![receive, change, id],
+            )?;
+        }
+    }
+    Ok(())
 }
 
 // -- db_meta key/value helpers (KDF params, schema flags) ----------------

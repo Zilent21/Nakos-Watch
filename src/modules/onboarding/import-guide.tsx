@@ -55,8 +55,7 @@ export function ImportGuide() {
         <TabsContent value="hardware" className="space-y-2 pt-3">
           <p className="text-muted-foreground">
             The simplest way is to connect the hardware wallet to Sparrow (or the maker's own app), let it read the public key, and copy the descriptor from there as in the Sparrow tab.
-            Coldcard, Jade, Passport, Keystone and others can also export a watch-only wallet file or show a public-key QR. Look for "Export wallet", "Connect software wallet" or "Account
-            xpub" in the device's menu.
+            With a Trezor, open Trezor Suite, pick the account, and choose <b className="text-foreground">Details → Show public key</b> (confirm on the device). Copy that xpub or zpub.
           </p>
           <p className="text-xs text-muted-foreground">The device never shows its seed for this. If a screen asks you to type or reveal your seed, stop: that's not the export.</p>
         </TabsContent>

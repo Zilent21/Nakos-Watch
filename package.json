@@ -2,7 +2,7 @@
   "name": "nakos",
   "private": true,
   "license": "MIT",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "description": "Nakos: a free, open-source, watch-only Bitcoin dashboard. Local-first, no accounts, no servers.",
   "scripts": {
@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "lint": "eslint . --ext ts,tsx",
-    "test:ui": "node --test src/lib/phone-tabs.test.ts src/lib/format.test.ts src/lib/os-text.test.ts src/lib/key-guard.test.ts"
+    "test:ui": "node --test src/lib/phone-tabs.test.ts src/lib/format.test.ts src/lib/os-text.test.ts src/lib/key-guard.test.ts src/lib/receive.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.3",

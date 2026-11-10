@@ -42,7 +42,7 @@ pub struct SyncSummary {
     pub balance_sats: u64,
 }
 
-fn parse_network(net: &str) -> Network {
+pub(crate) fn parse_network(net: &str) -> Network {
     match net {
         "testnet" => Network::Testnet,
         "signet" => Network::Signet,

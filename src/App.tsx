@@ -13,6 +13,7 @@ import { SecurityPage } from "@/modules/security/security-page";
 import { AssetMapPage } from "@/modules/asset-mapping/asset-map-page";
 import { UtxoManagerPage } from "@/modules/utxo-manager/utxo-manager-page";
 import { SpendingPlannerPage } from "@/modules/spending-planner/spending-planner-page";
+import { ReceivePage } from "@/modules/receive/receive-page";
 import { TodayPage } from "@/modules/today/today-page";
 import { HealthScorePage } from "@/modules/health-score/health-score-page";
 import { PrivacyPage } from "@/modules/privacy/privacy-page";
@@ -78,6 +79,7 @@ export default function App() {
         <Route path="/asset-map" element={<AssetMapPage />} />
         <Route path="/utxos" element={<UtxoManagerPage />} />
         <Route path="/spend" element={<SpendingPlannerPage />} />
+        <Route path="/receive" element={<ReceivePage />} />
         <Route path="/health" element={<HealthScorePage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/node" element={<NodeOpsPage />} />

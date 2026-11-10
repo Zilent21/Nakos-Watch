@@ -216,3 +216,30 @@ export const vaultAppHidden = (hidden: boolean) => invoke<void>("vault_app_hidde
 
 /** Opens one of Nakos's own pages in the system browser. The webview can only name which one. */
 export const openProjectLink = (which: "source" | "support" | "help_import" | "security") => invoke<void>("open_project_link", { which });
+
+// -- receiving (0.6.0) -------------------------------------------------------
+
+export const receiveOverview = (walletId: string) => invoke<T.ReceiveOverview>("receive_overview", { walletId });
+export const newReceiveAddress = (walletId: string, label: string | null, amountSats: number | null) =>
+  invoke<T.ReceiveAddress>("new_receive_address", { walletId, label, amountSats });
+export const updateReceiveAddress = (id: string, label: string | null, amountSats: number | null) =>
+  invoke<T.ReceiveAddress>("update_receive_address", { id, label, amountSats });
+export const setReceiveChecked = (id: string, checked: boolean) => invoke<T.ReceiveAddress>("set_receive_checked", { id, checked });
+/** QR modules for a bitcoin: link, made in Rust (no JS library, no network). */
+export const paymentQr = (text: string) => invoke<T.Qr>("payment_qr", { text });
+
+export const listAddressLists = () => invoke<T.AddressList[]>("list_address_lists");
+export const createAddressList = (name: string, network?: string) => invoke<string>("create_address_list", { name, network });
+export const updateAddressList = (id: string, name: string, lowAt: number) => invoke<void>("update_address_list", { id, name, lowAt });
+export const deleteAddressList = (id: string) => invoke<void>("delete_address_list", { id });
+export const addSavedAddresses = (listId: string, text: string) => invoke<T.AddAddressesResult>("add_saved_addresses", { listId, text });
+export const deleteSavedAddress = (id: string) => invoke<void>("delete_saved_address", { id });
+export const giveOutNextAddress = (listId: string) => invoke<T.SavedAddress>("give_out_next_address", { listId });
+export const updateSavedAddress = (id: string, label: string | null) => invoke<T.SavedAddress>("update_saved_address", { id, label });
+export const setSavedChecked = (id: string, checked: boolean) => invoke<T.SavedAddress>("set_saved_checked", { id, checked });
+export const checkAddressLists = () => invoke<T.AddressCheckResult>("check_address_lists");
+
+export const listAlerts = (includeRead?: boolean) => invoke<T.AlertEvent[]>("list_alerts", { includeRead });
+export const markAlertsRead = (ids?: string[]) => invoke<void>("mark_alerts_read", { ids: ids ?? null });
+export const listBalanceAlerts = () => invoke<T.BalanceAlert[]>("list_balance_alerts");
+export const setBalanceAlert = (walletId: string, thresholdSats: number | null) => invoke<void>("set_balance_alert", { walletId, thresholdSats });

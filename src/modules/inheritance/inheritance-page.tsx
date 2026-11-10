@@ -177,7 +177,7 @@ export function InheritancePage() {
             onChange={(e) => setInstructions(e.target.value)}
             rows={8}
             className="w-full rounded-md border border-border bg-secondary/40 p-3 text-sm outline-hidden focus-visible:ring-1 focus-visible:ring-[hsl(var(--ring))]"
-            placeholder="1. Coldcard #1 is in the home safe...&#10;2. Coldcard #2 is with [contact] in a bank deposit box...&#10;3. This is a 2-of-3 multisig — you need any 2 of the 3 devices..."
+            placeholder="1. Trezor #1 is in the home safe...&#10;2. Trezor #2 is with [contact] in a bank deposit box...&#10;3. This is a 2-of-3 multisig — you need any 2 of the 3 devices..."
           />
           <Button onClick={() => saveInstructionsMutation.mutate()} disabled={saveInstructionsMutation.isPending}>
             Save instructions

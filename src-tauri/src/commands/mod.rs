@@ -1,3 +1,5 @@
+mod address_lists;
+mod alerts;
 mod autolock;
 mod about;
 mod backup;
@@ -9,6 +11,7 @@ mod inheritance_packet;
 mod node;
 mod pdf;
 mod prefs;
+mod receive;
 mod scoring_cmd;
 mod utxos;
 mod wallets;
@@ -20,7 +23,10 @@ pub use explorer_cmd::*;
 pub use inheritance::*;
 pub use inheritance_packet::*;
 pub use node::*;
+pub use address_lists::*;
+pub use alerts::*;
 pub use prefs::*;
+pub use receive::*;
 pub use scoring_cmd::*;
 pub use utxos::*;
 pub use wallets::*;
@@ -105,6 +111,27 @@ pub fn handler() -> impl Fn(tauri::ipc::Invoke) -> bool + Send + Sync + 'static 
         prefs::get_preference,
         prefs::set_preference,
         prefs::get_all_preferences,
+        // receiving
+        receive::receive_overview,
+        receive::new_receive_address,
+        receive::update_receive_address,
+        receive::set_receive_checked,
+        receive::payment_qr,
+        address_lists::list_address_lists,
+        address_lists::create_address_list,
+        address_lists::update_address_list,
+        address_lists::delete_address_list,
+        address_lists::add_saved_addresses,
+        address_lists::delete_saved_address,
+        address_lists::give_out_next_address,
+        address_lists::update_saved_address,
+        address_lists::set_saved_checked,
+        address_lists::check_address_lists,
+        // alerts
+        alerts::list_alerts,
+        alerts::mark_alerts_read,
+        alerts::list_balance_alerts,
+        alerts::set_balance_alert,
     ]
 }
 

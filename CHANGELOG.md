@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.6.0: receive, saved addresses, alerts (2026-11-09)
+
+Downloads and checksums are on nakos.org and in this repository's v0.6.0 release.
+
+### Added
+- **Receive.** The next fresh receiving address from a wallet's descriptor or xpub, with a QR code drawn from data made in Rust (no JS library), copy buttons and a `bitcoin:` link with optional amount and label. Shows index, path, fingerprint(s) and descriptor checksum. Never hands out an index twice and stops at the gap limit (20) with an explanation (`commands/receive.rs`).
+- **Check on device.** Every address is "Checked on device" or not. At or over a threshold (Settings → Receiving: 100k, 250k, 500k default, 1M, 5M sats, custom, or every address) the QR stays covered until the address is marked checked or "Show without checking" is chosen.
+- **Saved addresses.** Lists of receiving addresses pasted from the person's own wallets, up to 20 unused per list. Each line is checked (network, duplicates, never a seed, xprv or WIF), "Use next address" gives each one out once, "Running low" at 3 or fewer (per list), and "Check for payments" asks the Electrum server for each address's history (`commands/address_lists.rs`). Nothing here sends or touches an exchange.
+- **Alerts.** A balance-over alert per wallet (fires once per upward crossing), payment received at a handed-out address, saved address used, list running low. Shown on Today and under Receive → Alerts; optional checks every 15, 30 or 60 minutes while Nakos is open (`commands/alerts.rs`, `hooks/use-auto-check.ts`).
+- Receive says which wallets give new addresses: an xpub or a descriptor ending in `/*` gives a fresh one each time; a single address or a descriptor without `/*` (Sparrow's `wpkh(<public key>)`) is only that address, which Receive shows once with its QR code and explains; a saved list gives only what was pasted. Before this, a second press on such a wallet failed with a database error.
+- **Sparrow's `<0;1>` descriptors work.** A descriptor that holds both branches (`xpub…/<0;1>/*`, what Sparrow's Settings tab and Bitcoin Core export) is now stored as its receive (`/0/*`) and change (`/1/*`) descriptors. Before this it was saved as pasted and every sync failed with "must not contain multipath keys". Wallets already saved that way are split when the vault opens (`db::split_saved_multipath_descriptors`); a descriptor that won't parse is left as it is.
+- **Wallet details.** Click a wallet's name in Portfolio to see what Nakos keeps for it: type, network, fingerprint, path, xpub, descriptors (with copy buttons), multisig cosigners, notes, when it was added and last synced.
+- Migration 0009: `receive_addresses`, `address_lists`, `saved_addresses`, `balance_alerts`, `alert_events`. No existing row changes.
+
+### Changed
+- Today keeps its full dashboard when there are no wallets; "Add your first wallet" is a Recommended item pointing to Portfolio, which has the import guide.
+- Examples and the import guide use Trezor.
+- About: the support link no longer suggests a fixed amount.
+
+### Checked
+- `cargo test`: 241 passed, 1 ignored. `tsc -b` clean, `vite build` OK, `npm run test:ui` 19 passed. Secret scan clean.
+
 ## 0.5.0: free and open source, Linux, auto-lock (2026-11-05)
 
 The user-facing notes are in `docs/RELEASE-NOTES-0.5.0.md`. Downloads and checksums are on nakos.org and in this repository's v0.5.0 release.
